@@ -1,49 +1,54 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const ROLES = require("../utilconstants/rolesConstants");
 
 const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Please add a name'],
+      required: [true, "Please add a name"],
     },
     email: {
       type: String,
-      required: [true, 'Please add an email'],
+      required: [true, "Please add an email"],
       unique: true,
     },
     password: {
       type: String,
-      required: [true, 'Please add a password'],
+      required: [true, "Please add a password"],
     },
-     roles: { type: [String], enum: ['admin', 'manager', 'user'], default: ['user'] }, // Array of roles
+    roles: {
+      type: [String],
+      enum: Object.values(ROLES),
+      default: [ROLES.USER],
+    }, // Array of roles
   },
   {
     timestamps: true,
   }
 );
-
+//
 
 // Encrypting password before saving user
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-      next()
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
   }
 
-  this.password = await bcrypt.hash(this.password, 10)
-})
+  this.password = await bcrypt.hash(this.password, 10);
+});
 
 // Compare user password
 userSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password)
-}
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 // Return JWT token
 userSchema.methods.getJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_TIME
+    expiresIn: process.env.JWT_EXPIRES_TIME,
   });
-}
+};
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);

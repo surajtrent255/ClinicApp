@@ -1,0 +1,48 @@
+there is a table called lab_test_types.
+has the columns id, name, label, description, parent, status.
+
+there is another table test_reference_range. 
+has column id, Agroup_Group, value, test_type_name,
+
+
+patient_info table has columns
+id, patient_id, history, prescription, inspectful_reports
+
+inspectful_reports contain list of name of lab_test_types
+
+// Define the PatientInfo schema
+const patientInfoSchema = new mongoose.Schema(
+  {
+    // The ID for the patient info entry
+    patient_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Patient", // Assuming you have a Patient model
+      required: true,
+    },
+
+    // Medical history of the patient
+    history: { type: String, required: true },
+
+    // Prescription for the patient
+    prescription: { type: String, required: true },
+
+    // List of lab test names (from the LabTestType collection)
+    inspectful_reports: [
+      {
+        type: String, // You could use ObjectId if you prefer to reference LabTestType by _id
+      },
+    ],
+    approved_by_staff: { type: Boolean, required: true, default: false },
+  },
+  { timestamps: true } // Automatically adds createdAt and updatedAt fields
+);
+
+// Create and export the PatientInfo model
+const PatientInfoSchema = mongoose.model("PatientInfo", patientInfoSchema);
+module.exports = PatientInfoSchema;  const patientInfoRetriveRequestValidator = async (req, res, next) => {
+  const patientInfos = await PatientInfoSchema.find();
+
+  return { patientInfos };
+};. i want make general API, that will fetch all the patientinfo objects . with
+http://localhost:5000/api/staffs/patient-info?search_by ={ key: patient_id, value: "454"}& sortBy = "" &offset = ""
+handle all search sort and pagination in one api 
